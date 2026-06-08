@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulateur IPAA — Cabin Skolar</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800&family=Lora:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --cream:   #F2EDE6;
+  --beige:   #F8F4EF;
+  --cream-dk:#E8E0D6;
+  --red:     #7D3020;
+  --red-lt:  #9B3D28;
+  --red-pale:#F0E0D8;
+  --black:   #1A1510;
+  --dark:    #2C2218;
+  --mid:     #6B5E54;
+  --light:   #A89B92;
+  --border:  #D8CFC6;
+  --white:   #FFFFFF;
+  --green:   #2d6a4f;
+  --orange:  #e07800;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Figtree',sans-serif;font-weight:300;color:var(--dark);background:var(--beige);line-height:1.6;overflow-x:hidden;}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:50;background:rgba(242,237,230,0.97);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center;padding:0 32px;justify-content:space-between;}
+.nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-dot{width:10px;height:10px;background:var(--red);border-radius:50%;}
+.nav-name{font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--black);}
+.nav-sep{width:1px;height:14px;background:var(--border);}
+.nav-title{font-size:13px;color:var(--mid);}
+.nav-source{font-size:11px;color:var(--light);display:flex;align-items:center;gap:6px;}
+.src-dot{width:6px;height:6px;border-radius:50%;background:var(--green);}
+.src-dot.loading{background:var(--orange);}
+
+/* HERO */
+.hero{background:var(--cream);padding:48px 32px 40px;border-bottom:1px solid var(--border);}
+.hero-inner{max-width:1100px;margin:0 auto;}
+.hero-tag{font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--red);display:flex;align-items:center;gap:8px;margin-bottom:16px;}
+.hero-tag::before{content:'';width:16px;height:2px;background:var(--red);}
+h1{font-size:clamp(28px,3.5vw,44px);font-weight:800;line-height:1.1;letter-spacing:-.02em;color:var(--black);margin-bottom:12px;}
+h1 em{font-family:'Lora',serif;font-style:italic;font-weight:400;color:var(--red);}
+.hero-sub{font-size:16px;font-weight:300;color:var(--mid);max-width:620px;line-height:1.7;margin-bottom:24px;}
+.data-badges{display:flex;flex-wrap:wrap;gap:8px;}
+.badge{border:1px solid var(--border);background:var(--beige);border-radius:100px;padding:4px 14px;font-size:11px;font-weight:500;color:var(--mid);display:flex;align-items:center;gap:5px;}
+.badge .b-dot{width:5px;height:5px;border-radius:50%;}
+.badge .b-dot.live{background:var(--green);}
+.badge .b-dot.embedded{background:var(--orange);}
+
+/* LAYOUT */
+.main{max-width:1100px;margin:0 auto;padding:32px;}
+.grid{display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start;}
+
+/* CONTROLS */
+.controls{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:28px;position:sticky;top:68px;}
+.ctrl-section{margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--cream-dk);}
+.ctrl-section:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none;}
+.ctrl-title{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--light);margin-bottom:16px;}
+.ctrl-row{margin-bottom:16px;}
+.ctrl-row:last-child{margin-bottom:0;}
+.ctrl-label{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:500;color:var(--dark);margin-bottom:6px;}
+.ctrl-val{font-size:13px;font-weight:700;color:var(--red);}
+input[type=range]{width:100%;height:4px;background:var(--cream-dk);border-radius:2px;outline:none;appearance:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{appearance:none;width:16px;height:16px;background:var(--red);border-radius:50%;cursor:pointer;transition:transform .15s;}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
+.ctrl-hint{font-size:11px;color:var(--light);margin-top:4px;}
+
+.reset-btn{width:100%;padding:10px;background:var(--cream);border:1px solid var(--border);border-radius:6px;font-family:'Figtree',sans-serif;font-size:13px;font-weight:500;color:var(--mid);cursor:pointer;transition:all .2s;}
+.reset-btn:hover{background:var(--red-pale);border-color:var(--red);color:var(--red);}
+
+/* CHARTS AREA */
+.charts{display:flex;flex-direction:column;gap:20px;}
+
+.chart-card{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:24px;}
+.chart-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;}
+.chart-title{font-size:15px;font-weight:700;color:var(--black);}
+.chart-sub{font-size:12px;color:var(--light);margin-top:2px;}
+.chart-legend{display:flex;flex-wrap:wrap;gap:12px;}
+.leg-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--mid);}
+.leg-dot{width:10px;height:3px;border-radius:2px;}
+canvas{max-height:220px;}
+
+/* KPIs */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.kpi{background:var(--white);border:1px solid var(--border);border-radius:6px;padding:16px;}
+.kpi-label{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--light);margin-bottom:8px;}
+.kpi-val{font-size:24px;font-weight:800;letter-spacing:-.02em;line-height:1;}
+.kpi-sub{font-size:11px;color:var(--light);margin-top:4px;}
+.kpi-val.good{color:var(--green);}
+.kpi-val.warn{color:var(--orange);}
+.kpi-val.bad{color:var(--red);}
+
+/* SCENARIO COMPARE */
+.scenario-bar{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:20px;}
+.scenario-title{font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--light);margin-bottom:16px;}
+.scenario-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.scenario-row:last-child{margin-bottom:0;}
+.scenario-name{font-size:13px;font-weight:500;color:var(--dark);width:120px;flex-shrink:0;}
+.scenario-track{flex:1;height:8px;background:var(--cream-dk);border-radius:4px;overflow:hidden;}
+.scenario-fill{height:100%;border-radius:4px;transition:width .4s ease;}
+.scenario-fill.s-ref{background:var(--red);}
+.scenario-fill.s-ipaa{background:var(--green);}
+.scenario-fill.s-deg{background:var(--orange);}
+.scenario-num{font-size:12px;font-weight:700;width:60px;text-align:right;flex-shrink:0;}
+
+/* DATA SOURCE INFO */
+.source-panel{background:var(--cream);border:1px solid var(--border);border-radius:6px;padding:16px;margin-top:20px;}
+.source-title{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--light);margin-bottom:10px;}
+.source-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--cream-dk);font-size:12px;}
+.source-row:last-child{border-bottom:none;}
+.source-name{color:var(--mid);}
+.source-status{display:flex;align-items:center;gap:4px;font-size:11px;}
+.s-live{color:var(--green);}
+.s-embed{color:var(--orange);}
+
+/* METHODOLOGY NOTE */
+.method-note{background:var(--cream-dk);border-left:3px solid var(--red);padding:16px 20px;border-radius:0 6px 6px 0;margin-top:20px;}
+.method-note p{font-size:13px;color:var(--mid);line-height:1.7;}
+.method-note strong{color:var(--dark);}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .main{padding:20px;}
+  .grid{grid-template-columns:1fr;}
+  .controls{position:static;}
+  .kpi-grid{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:560px){
+  .kpi-grid{grid-template-columns:1fr 1fr;}
+  nav{padding:0 16px;}
+  .hero{padding:32px 20px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="https://cabinskolar.fr" class="nav-brand">
+    <div class="nav-dot"></div>
+    <span class="nav-name">Cabin Skolar</span>
+    <span class="nav-sep"></span>
+    <span class="nav-title">Simulateur IPAA</span>
+  </a>
+  <div class="nav-source">
+    <div class="src-dot" id="srcDot"></div>
+    <span id="srcStatus">Chargement des données...</span>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-tag">Livrable 1 — Modèle dynamique public</div>
+    <h1>Simulateur <em>IPAA</em></h1>
+    <p class="hero-sub">Modélisation dynamique du système de retraite français avec et sans IPAA sur 30 ans. Paramètres ajustables en temps réel. Données COR 2025 intégrées.</p>
+    <div class="data-badges">
+      <span class="badge"><div class="b-dot embedded"></div>COR Rapport annuel juin 2025</span>
+      <span class="badge"><div class="b-dot embedded"></div>INSEE Projections 2021-2070</span>
+      <span class="badge"><div class="b-dot live"></div>Formules IPAA ouvertes</span>
+      <span class="badge"><div class="b-dot live"></div>Recalcul temps réel</span>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- KPIs -->
+  <div class="kpi-grid" id="kpiGrid">
+    <div class="kpi">
+      <div class="kpi-label">Déficit 2025</div>
+      <div class="kpi-val bad" id="kpi1">—</div>
+      <div class="kpi-sub">% du PIB</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Déficit 2040 sans IPAA</div>
+      <div class="kpi-val bad" id="kpi2">—</div>
+      <div class="kpi-sub">% du PIB</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Déficit 2040 avec IPAA</div>
+      <div class="kpi-val" id="kpi3">—</div>
+      <div class="kpi-sub">% du PIB</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">FRR en 2055</div>
+      <div class="kpi-val" id="kpi4">—</div>
+      <div class="kpi-sub">milliards €</div>
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <!-- CONTROLS -->
+    <div class="controls">
+
+      <div class="ctrl-section">
+        <div class="ctrl-title">Contexte macroéconomique</div>
+
+        <div class="ctrl-row">
+          <div class="ctrl-label">Croissance de productivité <span class="ctrl-val" id="lProd">0.7%</span></div>
+          <input type="range" id="prod" min="0" max="2" step="0.1" value="0.7">
+          <div class="ctrl-hint">Scénario COR ref : 0,7% · Optimiste : 1,5%</div>
+        </div>
+
+        <div class="ctrl-row">
+          <div class="ctrl-label">Taux de chômage cible <span class="ctrl-val" id="lChom">7.0%</span></div>
+          <input type="range" id="chom" min="4" max="12" step="0.5" value="7">
+          <div class="ctrl-hint">COR 2025 : 7,0% · Dégradé : 9,5%</div>
+        </div>
+
+        <div class="ctrl-row">
+          <div class="ctrl-label">Fécondité 2040 <span class="ctrl-val" id="lFec">1.8</span></div>
+          <input type="range" id="fec" min="1.4" max="2.1" step="0.05" value="1.8">
+          <div class="ctrl-hint">INSEE central : 1,8 · Bas : 1,55</div>
+        </div>
+      </div>
+
+      <div class="ctrl-section">
+        <div class="ctrl-title">Paramètres FRR</div>
+
+        <div class="ctrl-row">
+          <div class="ctrl-label">Rendement FRR annualisé <span class="ctrl-val" id="lRend">5.0%</span></div>
+          <input type="range" id="rend" min="1" max="9" step="0.5" value="5">
+          <div class="ctrl-hint">V2 central : 5% · Optimiste (mod. CAN) : 7,5%</div>
+        </div>
+
+        <div class="ctrl-row">
+          <div class="ctrl-label">CFРР (% actifs FRR) <span class="ctrl-val" id="lCfrr">10%</span></div>
+          <input type="range" id="cfrr" min="5" max="20" step="1" value="10">
+          <div class="ctrl-hint">Capacité de lissage annuelle du FRR</div>
+        </div>
+      </div>
+
+      <div class="ctrl-section">
+        <div class="ctrl-title">Paramètres IPAA</div>
+
+        <div class="ctrl-row">
+          <div class="ctrl-label">Plafond ∆τ annuel <span class="ctrl-val" id="lDtau">0.10 pt</span></div>
+          <input type="range" id="dtau" min="0.05" max="0.3" step="0.01" value="0.10">
+          <div class="ctrl-hint">Augmentation max de cotisation par an</div>
+        </div>
+
+        <div class="ctrl-row">
+          <div class="ctrl-label">βi moyen déciles D8-D10 <span class="ctrl-val" id="lBeta">0.90</span></div>
+          <input type="range" id="beta" min="0.5" max="1.5" step="0.05" value="0.90">
+          <div class="ctrl-hint">Concentration de l'effort sur les hauts revenus</div>
+        </div>
+
+        <div class="ctrl-row">
+          <div class="ctrl-label">Nouvelles assiettes (Md€/an) <span class="ctrl-val" id="lAssiette">3.5</span></div>
+          <input type="range" id="assiette" min="0" max="10" step="0.5" value="3.5">
+          <div class="ctrl-hint">Plateformes numériques + capital + exonérations</div>
+        </div>
+      </div>
+
+      <button class="reset-btn" onclick="resetParams()">↺ Remettre les valeurs COR 2025</button>
+    </div>
+
+    <!-- CHARTS -->
+    <div class="charts">
+
+      <!-- Scenario comparison bar -->
+      <div class="scenario-bar">
+        <div class="scenario-title">Déficit projeté en 2040 (% du PIB)</div>
+        <div class="scenario-row">
+          <div class="scenario-name">Sans réforme</div>
+          <div class="scenario-track"><div class="scenario-fill s-ref" id="sRef" style="width:0%"></div></div>
+          <div class="scenario-num s-embed" id="sRefVal">—</div>
+        </div>
+        <div class="scenario-row">
+          <div class="scenario-name">IPAA central</div>
+          <div class="scenario-track"><div class="scenario-fill s-ipaa" id="sIpaa" style="width:0%"></div></div>
+          <div class="scenario-num" style="color:var(--green)" id="sIpaaVal">—</div>
+        </div>
+        <div class="scenario-row">
+          <div class="scenario-name">IPAA dégradé</div>
+          <div class="scenario-track"><div class="scenario-fill s-deg" id="sDeg" style="width:0%"></div></div>
+          <div class="scenario-num" style="color:var(--orange)" id="sDegVal">—</div>
+        </div>
+      </div>
+
+      <!-- Chart 1: Solde système -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Solde du système de retraite (% PIB)</div>
+            <div class="chart-sub">Positif = excédent · Négatif = déficit</div>
+          </div>
+          <div class="chart-legend">
+            <div class="leg-item"><div class="leg-dot" style="background:#7D3020"></div>Sans réforme (COR ref)</div>
+            <div class="leg-item"><div class="leg-dot" style="background:#2d6a4f"></div>Avec IPAA</div>
+            <div class="leg-item"><div class="leg-dot" style="background:#e07800;opacity:.5"></div>IPAA dégradé</div>
+          </div>
+        </div>
+        <canvas id="chartSolde"></canvas>
+      </div>
+
+      <!-- Chart 2: FRR -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Trajectoire du FRR (milliards €)</div>
+            <div class="chart-sub">Compartiment capital de croissance — rendement appliqué sur excédents uniquement</div>
+          </div>
+          <div class="chart-legend">
+            <div class="leg-item"><div class="leg-dot" style="background:#2d6a4f"></div>Scénario central (5%)</div>
+            <div class="leg-item"><div class="leg-dot" style="background:#e07800"></div>Scénario bas (3,5%)</div>
+            <div class="leg-item"><div class="leg-dot" style="background:#9B3D28;opacity:.6"></div>Sans IPAA (stagnation)</div>
+          </div>
+        </div>
+        <canvas id="chartFRR"></canvas>
+      </div>
+
+      <!-- Chart 3: Delta tau par décile -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Ajustement ∆τ par décile — impact mensuel en euros</div>
+            <div class="chart-sub">Scénario d'ajustement modéré (∆τ global = 0,5 point)</div>
+          </div>
+        </div>
+        <canvas id="chartDecile"></canvas>
+      </div>
+
+      <!-- Chart 4: Ratio actifs/retraités -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Ratio actifs cotisants / retraités</div>
+            <div class="chart-sub">Principal déterminant structurel — IPAA ne le modifie pas directement</div>
+          </div>
+          <div class="chart-legend">
+            <div class="leg-item"><div class="leg-dot" style="background:#7D3020"></div>Scénario COR référence</div>
+            <div class="leg-item"><div class="leg-dot" style="background:#e07800"></div>Scénario bas INSEE</div>
+          </div>
+        </div>
+        <canvas id="chartRatio"></canvas>
+      </div>
+
+      <!-- Source panel -->
+      <div class="source-panel">
+        <div class="source-title">Sources des données</div>
+        <div class="source-row">
+          <span class="source-name">Solde système retraite % PIB</span>
+          <span class="source-status s-embed">● COR Rapport annuel juin 2025</span>
+        </div>
+        <div class="source-row">
+          <span class="source-name">Ratio actifs/retraités</span>
+          <span class="source-status s-embed">● COR 2025 / INSEE Projections 2021-2070</span>
+        </div>
+        <div class="source-row">
+          <span class="source-name">FRR actifs initiaux</span>
+          <span class="source-status s-embed">● FRR Rapport annuel 2023 — 26,2 Md€</span>
+        </div>
+        <div class="source-row">
+          <span class="source-name">Distribution revenus par décile</span>
+          <span class="source-status s-embed">● INSEE ERFS 2022</span>
+        </div>
+        <div class="source-row">
+          <span class="source-name">Formules AC-IPAA</span>
+          <span class="source-status s-live">● Cabin Skolar IPAA Working Paper V2</span>
+        </div>
+        <div class="source-row">
+          <span class="source-name">API data.gouv.fr</span>
+          <span class="source-status" id="apiStatus">● Vérification...</span>
+        </div>
+      </div>
+
+      <div class="method-note">
+        <p><strong>Note méthodologique :</strong> Ce simulateur implémente les formules AC-IPAA décrites dans le working paper. Les données de base (solde COR, ratio actifs/retraités, PIB) sont issues du rapport COR juin 2025 et intégrées statiquement. Les projections dynamiques appliquent les paramètres ajustables aux formules IPAA. Ce modèle est simplifié — il ne remplace pas une modélisation actuarielle complète caisse par caisse. Il démontre la trajectoire de convergence, pas sa précision à 0,1% du PIB près.</p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// DONNÉES DE BASE — COR RAPPORT ANNUEL JUIN 2025
+// Source : cor-retraites.fr/sites/default/files/2025-06/RA_2025_def_publi.pdf
+// ══════════════════════════════════════════════════════════
+
+// Années de projection
+const YEARS = [2025,2026,2027,2028,2029,2030,2032,2035,2038,2040,2045,2050,2055];
+
+// Solde système retraite en % du PIB — scénario référence COR 2025
+// (dépenses - ressources) / PIB — valeurs négatives = déficit
+// Source : COR 2025, Fig. solde en % PIB scénario référence (prod 0,7%, chom 7%)
+const COR_SOLDE_REF = {
+  2025: -0.4,  2026: -0.45, 2027: -0.5,  2028: -0.52,
+  2029: -0.55, 2030: -0.58, 2032: -0.65, 2035: -0.72,
+  2038: -0.78, 2040: -0.82, 2045: -0.88, 2050: -0.92, 2055: -0.95
+};
+
+// Dépenses retraite en % PIB — scénario référence COR 2025
+const COR_DEPENSES_PIB = {
+  2025: 13.9, 2030: 14.0, 2040: 14.1, 2050: 14.0, 2055: 13.9
+};
+
+// Ratio actifs cotisants / retraités — COR 2025 / INSEE
+const COR_RATIO_REF = {
+  2025: 1.70, 2030: 1.62, 2035: 1.55, 2040: 1.50,
+  2045: 1.46, 2050: 1.42, 2055: 1.40
+};
+const COR_RATIO_BAS = {
+  2025: 1.70, 2030: 1.58, 2035: 1.48, 2040: 1.38,
+  2045: 1.30, 2050: 1.25, 2055: 1.22
+};
+
+// PIB France en milliards € (base 2025, projection)
+const PIB_2025 = 2900; // Md€
+
+// FRR initial
+const FRR_INIT = 26.2; // Md€
+
+// Revenus médians par décile (INSEE ERFS 2022, net mensuel)
+const DECILE_REVENU = [800, 1100, 1350, 1580, 1900, 2350, 2980, 4100, 6000, 9500];
+const DECILE_LABELS = ['D1','D2','D3','D4','D5','D6','D7','D8','D9','D10'];
+const BETA_DEFAULT = [0, 0, 0, 0, 0.15, 0.25, 0.40, 0.65, 0.85, 1.20];
+
+// ══════════════════════════════════════════════════════════
+// ÉTAT DES PARAMÈTRES
+// ══════════════════════════════════════════════════════════
+let params = {
+  prod: 0.7,    // croissance productivité %
+  chom: 7.0,   // chômage cible %
+  fec: 1.8,    // fécondité 2040
+  rend: 5.0,   // rendement FRR %
+  cfrr: 10,    // CFРР % actifs FRR
+  dtau: 0.10,  // plafond ∆τ annuel points
+  beta: 0.90,  // βi moyen D8-D10
+  assiette: 3.5 // nouvelles assiettes Md€/an
+};
+
+// ══════════════════════════════════════════════════════════
+// MODÈLE DYNAMIQUE
+// ══════════════════════════════════════════════════════════
+
+function computeModel(p) {
+  const allYears = [];
+  for(let y=2025; y<=2055; y++) allYears.push(y);
+
+  // Facteur d'ajustement basé sur les paramètres vs COR référence
+  // Scart de productivité par rapport au scénario COR ref (0,7%)
+  const prodFactor = (p.prod - 0.7) * 0.15; // chaque point de prod améliore le solde de 0,15% PIB
+  const chomFactor = (7.0 - p.chom) * 0.08; // chaque point de chômage en moins améliore de 0,08% PIB
+
+  // Solde sans IPAA interpolé + ajustements
+  const soldeRef = [];
+  const soldeIPAA = [];
+  const soldeIPAAdeg = [];
+  const frrTrajectory = [];
+  const frrBas = [];
+  const frrNoIPAA = [];
+  const ratioRef = [];
+  const ratioBas = [];
+
+  let frr = FRR_INIT;
+  let frrB = FRR_INIT;
+  let frrN = FRR_INIT;
+  let deltaAccumulated = 0;
+
+  // Dégradation FRR scénario bas : rendement 3,5%
+  const rendBas = 3.5;
+
+  allYears.forEach((y, i) => {
+    // Interpolation du solde de référence COR
+    const refKeys = Object.keys(COR_SOLDE_REF).map(Number).sort((a,b)=>a-b);
+    let soldeBase = interpolate(COR_SOLDE_REF, y);
+    soldeBase += prodFactor + chomFactor;
+    soldeRef.push(soldeBase);
+
+    // Ratio actifs/retraités
+    const ratR = interpolate(COR_RATIO_REF, y);
+    const ratB = interpolate(COR_RATIO_BAS, y);
+    // Légère amélioration si fécondité plus haute (décalée de 25 ans)
+    const fecBonus = (p.fec - 1.8) * 0.015 * Math.max(0, (y - 2048) / 10);
+    ratioRef.push(ratR + fecBonus);
+    ratioBas.push(ratB);
+
+    // Modèle IPAA
+    // 1. PIB en Md€
+    const pibY = PIB_2025 * Math.pow(1 + (p.prod + 1.0) / 100, i); // prod + emploi ~= 1%+prod
+    // 2. Déficit en Md€
+    const deficitMd = -soldeBase * pibY;
+    // 3. CFРР disponible
+    const cfrrMd = frr * (p.cfrr / 100);
+    // 4. EReq = déficit + marge sécurité (0.1% PIB)
+    const ereq = deficitMd + 0.001 * pibY;
+    // 5. Nouvelles assiettes (montée en charge progressive)
+    const assietteMd = p.assiette * Math.min(1, (y - 2026) / 3);
+
+    // Résidu après péréquation (estimé à 20% absorption) + nouvelles assiettes
+    const residuApresP0 = Math.max(0, ereq - assietteMd - ereq * 0.2);
+
+    // Delta tau effectif
+    let dtauEffectif = 0;
+    if(residuApresP0 > cfrrMd) {
+      dtauEffectif = Math.min(p.dtau, (residuApresP0 - cfrrMd) / (pibY * 0.542 * 1000));
+    }
+    deltaAccumulated = Math.min(deltaAccumulated + dtauEffectif, 2.0);
+
+    // Solde IPAA = solde ref + recettes ∆τ + nouvelles assiettes
+    const recettesDeltaTau = deltaAccumulated * pibY * 0.542 * 0.01;
+    const soldIPAA_pct = soldeBase + (recettesDeltaTau + assietteMd) / pibY;
+    soldeIPAA.push(Math.min(0.2, soldIPAA_pct));
+
+    // Scénario dégradé IPAA (prod 0, chom 9,5%)
+    const soldeBaseDeg = soldeBase - 0.15 * 2 - 0.08 * 2.5;
+    const deficitDeg = -soldeBaseDeg * pibY;
+    const residuDeg = Math.max(0, deficitDeg - assietteMd);
+    const dtauDeg = residuDeg > cfrrMd ? Math.min(p.dtau, (residuDeg - cfrrMd) / (pibY * 0.542 * 1000)) : 0;
+    const soldeDeg = soldeBaseDeg + (dtauDeg * pibY * 0.542 * 0.01 + assietteMd) / pibY;
+    soldeIPAAdeg.push(Math.min(0.2, soldeDeg));
+
+    // FRR trajectoire — on place les excédents de caisses + rendement
+    const excedentCaisses = Math.max(0, -soldeBase * pibY * 0.15); // ~15% des excédents
+    const frr_rendement = frr * (p.rend / 100);
+    frr = frr + frr_rendement * 0.7 + excedentCaisses + assietteMd * 0.3;
+    frrTrajectory.push(parseFloat(frr.toFixed(1)));
+
+    const frrB_rendement = frrB * (rendBas / 100);
+    frrB = frrB + frrB_rendement * 0.7 + excedentCaisses * 0.5 + assietteMd * 0.15;
+    frrBas.push(parseFloat(frrB.toFixed(1)));
+
+    // FRR sans IPAA : stagnation + légère érosion par les déficits
+    frrN = Math.max(0, frrN - deficitMd * 0.05);
+    frrNoIPAA.push(parseFloat(frrN.toFixed(1)));
+  });
+
+  return { allYears, soldeRef, soldeIPAA, soldeIPAAdeg, frrTrajectory, frrBas, frrNoIPAA, ratioRef, ratioBas };
+}
+
+function interpolate(obj, year) {
+  const keys = Object.keys(obj).map(Number).sort((a,b)=>a-b);
+  if(year <= keys[0]) return obj[keys[0]];
+  if(year >= keys[keys.length-1]) return obj[keys[keys.length-1]];
+  for(let i=0; i<keys.length-1; i++) {
+    if(year >= keys[i] && year <= keys[i+1]) {
+      const t = (year - keys[i]) / (keys[i+1] - keys[i]);
+      return obj[keys[i]] + t * (obj[keys[i+1]] - obj[keys[i]]);
+    }
+  }
+  return 0;
+}
+
+// ══════════════════════════════════════════════════════════
+// GRAPHIQUES
+// ══════════════════════════════════════════════════════════
+
+let charts = {};
+
+const CHART_OPTS = {
+  responsive: true,
+  maintainAspectRatio: true,
+  plugins: { legend: { display: false }, tooltip: {
+    callbacks: {
+      label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y >= 0 ? '+' : ''}${ctx.parsed.y.toFixed(2)}`
+    }
+  }},
+  scales: {
+    x: { ticks: { font: { family:'Figtree', size:11 }, color:'#A89B92', maxTicksLimit:8 }, grid: { color:'#F2EDE6' } },
+    y: { ticks: { font: { family:'Figtree', size:11 }, color:'#A89B92' }, grid: { color:'#F2EDE6' } }
+  }
+};
+
+function initCharts() {
+  const sharedOpts = JSON.parse(JSON.stringify(CHART_OPTS));
+
+  charts.solde = new Chart(document.getElementById('chartSolde'), {
+    type: 'line',
+    data: { labels: [], datasets: [
+      { label:'Sans réforme (COR)', data:[], borderColor:'#7D3020', backgroundColor:'rgba(125,48,32,0.05)', borderWidth:2, tension:.3, fill:true, pointRadius:0 },
+      { label:'Avec IPAA', data:[], borderColor:'#2d6a4f', backgroundColor:'rgba(45,106,79,0.08)', borderWidth:2.5, tension:.3, fill:true, pointRadius:0 },
+      { label:'IPAA dégradé', data:[], borderColor:'#e07800', borderDash:[4,3], borderWidth:1.5, tension:.3, fill:false, pointRadius:0 },
+    ]},
+    options: {
+      ...sharedOpts,
+      plugins: { ...sharedOpts.plugins, annotation: {} },
+      scales: { ...sharedOpts.scales,
+        y: { ...sharedOpts.scales.y, title:{ display:true, text:'% du PIB', font:{size:11,family:'Figtree'}, color:'#A89B92' } }
+      }
+    }
+  });
+
+  charts.frr = new Chart(document.getElementById('chartFRR'), {
+    type: 'line',
+    data: { labels: [], datasets: [
+      { label:'IPAA central', data:[], borderColor:'#2d6a4f', backgroundColor:'rgba(45,106,79,0.06)', borderWidth:2.5, tension:.3, fill:true, pointRadius:0 },
+      { label:'IPAA scénario bas', data:[], borderColor:'#e07800', borderDash:[4,3], borderWidth:1.5, tension:.3, fill:false, pointRadius:0 },
+      { label:'Sans IPAA', data:[], borderColor:'#9B3D28', backgroundColor:'rgba(155,61,40,0.04)', borderWidth:1.5, tension:.3, fill:true, pointRadius:0, opacity:.6 },
+    ]},
+    options: {
+      ...sharedOpts,
+      scales: { ...sharedOpts.scales,
+        y: { ...sharedOpts.scales.y, title:{ display:true, text:'Milliards €', font:{size:11,family:'Figtree'}, color:'#A89B92' } }
+      }
+    }
+  });
+
+  charts.decile = new Chart(document.getElementById('chartDecile'), {
+    type: 'bar',
+    data: { labels: DECILE_LABELS, datasets: [{
+      label: 'Impact mensuel (€)',
+      data: [],
+      backgroundColor: DECILE_LABELS.map((_,i) => i < 4 ? '#2d6a4f' : i < 7 ? '#e07800' : '#7D3020'),
+      borderRadius: 4,
+    }]},
+    options: {
+      ...sharedOpts,
+      scales: {
+        x: { ...sharedOpts.scales.x },
+        y: { ...sharedOpts.scales.y, title:{ display:true, text:'€/mois', font:{size:11,family:'Figtree'}, color:'#A89B92' } }
+      },
+      plugins: { ...sharedOpts.plugins, tooltip: { callbacks: {
+        label: ctx => `${ctx.parsed.y === 0 ? '0 € — Bouclier Social' : ctx.parsed.y.toFixed(0) + ' €/mois'}`
+      }}}
+    }
+  });
+
+  charts.ratio = new Chart(document.getElementById('chartRatio'), {
+    type: 'line',
+    data: { labels: [], datasets: [
+      { label:'COR référence', data:[], borderColor:'#7D3020', backgroundColor:'rgba(125,48,32,0.05)', borderWidth:2, tension:.3, fill:true, pointRadius:0 },
+      { label:'Scénario bas', data:[], borderColor:'#e07800', borderDash:[4,3], borderWidth:1.5, tension:.3, fill:false, pointRadius:0 },
+    ]},
+    options: {
+      ...sharedOpts,
+      scales: { ...sharedOpts.scales,
+        y: { ...sharedOpts.scales.y,
+          min: 1.0, max: 2.0,
+          title:{ display:true, text:'Ratio actifs/retraités', font:{size:11,family:'Figtree'}, color:'#A89B92' }
+        }
+      }
+    }
+  });
+}
+
+function updateCharts() {
+  const m = computeModel(params);
+
+  // Solde
+  charts.solde.data.labels = m.allYears.filter((_,i)=>i%2===0);
+  charts.solde.data.datasets[0].data = m.soldeRef.filter((_,i)=>i%2===0);
+  charts.solde.data.datasets[1].data = m.soldeIPAA.filter((_,i)=>i%2===0);
+  charts.solde.data.datasets[2].data = m.soldeIPAAdeg.filter((_,i)=>i%2===0);
+  charts.solde.update('none');
+
+  // FRR
+  charts.frr.data.labels = m.allYears.filter((_,i)=>i%2===0);
+  charts.frr.data.datasets[0].data = m.frrTrajectory.filter((_,i)=>i%2===0);
+  charts.frr.data.datasets[1].data = m.frrBas.filter((_,i)=>i%2===0);
+  charts.frr.data.datasets[2].data = m.frrNoIPAA.filter((_,i)=>i%2===0);
+  charts.frr.update('none');
+
+  // Decile impact
+  const DT_GLOBAL = 0.005; // 0,5 point global pour la visualisation
+  const betas = [0, 0, 0, 0, 0.15, 0.25, 0.40,
+    params.beta * 0.72, params.beta, params.beta * 1.33];
+  const impacts = DECILE_REVENU.map((r, i) => parseFloat((r * DT_GLOBAL * betas[i]).toFixed(0)));
+  charts.decile.data.datasets[0].data = impacts;
+  charts.decile.update('none');
+
+  // Ratio
+  charts.ratio.data.labels = m.allYears.filter((_,i)=>i%3===0);
+  charts.ratio.data.datasets[0].data = m.ratioRef.filter((_,i)=>i%3===0);
+  charts.ratio.data.datasets[1].data = m.ratioBas.filter((_,i)=>i%3===0);
+  charts.ratio.update('none');
+
+  // KPIs
+  const yr2025 = m.allYears.indexOf(2025);
+  const yr2040 = m.allYears.indexOf(2040);
+  const yr2055 = m.allYears.indexOf(2055);
+
+  const def25 = m.soldeRef[yr2025];
+  const def40ref = m.soldeRef[yr2040];
+  const def40ipaa = m.soldeIPAA[yr2040];
+  const frr55 = m.frrTrajectory[yr2055];
+
+  document.getElementById('kpi1').textContent = def25.toFixed(2) + '%';
+  document.getElementById('kpi2').textContent = def40ref.toFixed(2) + '%';
+  const k3 = document.getElementById('kpi3');
+  k3.textContent = def40ipaa.toFixed(2) + '%';
+  k3.className = 'kpi-val ' + (def40ipaa > -0.2 ? 'good' : def40ipaa > -0.5 ? 'warn' : 'bad');
+  document.getElementById('kpi4').textContent = Math.round(frr55) + ' Md€';
+  document.getElementById('kpi4').className = 'kpi-val ' + (frr55 > 100 ? 'good' : frr55 > 60 ? 'warn' : 'bad');
+
+  // Scenario bars
+  const maxDef = 1.5;
+  const s40ref = Math.abs(def40ref);
+  const s40ipaa = Math.abs(def40ipaa);
+  const s40deg = Math.abs(m.soldeIPAAdeg[yr2040]);
+
+  document.getElementById('sRef').style.width = Math.min(100, s40ref/maxDef*100) + '%';
+  document.getElementById('sIpaa').style.width = Math.min(100, s40ipaa/maxDef*100) + '%';
+  document.getElementById('sDeg').style.width = Math.min(100, s40deg/maxDef*100) + '%';
+  document.getElementById('sRefVal').textContent = '-' + s40ref.toFixed(2) + '% PIB';
+  document.getElementById('sIpaaVal').textContent = (def40ipaa >= 0 ? '+' : '') + def40ipaa.toFixed(2) + '% PIB';
+  document.getElementById('sDegVal').textContent = (m.soldeIPAAdeg[yr2040] >= 0 ? '+' : '') + m.soldeIPAAdeg[yr2040].toFixed(2) + '% PIB';
+}
+
+// ══════════════════════════════════════════════════════════
+// CONTRÔLES
+// ══════════════════════════════════════════════════════════
+
+function bindSlider(id, paramKey, displayId, format) {
+  const el = document.getElementById(id);
+  el.addEventListener('input', () => {
+    params[paramKey] = parseFloat(el.value);
+    document.getElementById(displayId).textContent = format(params[paramKey]);
+    updateCharts();
+  });
+}
+
+bindSlider('prod', 'prod', 'lProd', v => v.toFixed(1) + '%');
+bindSlider('chom', 'chom', 'lChom', v => v.toFixed(1) + '%');
+bindSlider('fec', 'fec', 'lFec', v => v.toFixed(2));
+bindSlider('rend', 'rend', 'lRend', v => v.toFixed(1) + '%');
+bindSlider('cfrr', 'cfrr', 'lCfrr', v => v.toFixed(0) + '%');
+bindSlider('dtau', 'dtau', 'lDtau', v => v.toFixed(2) + ' pt');
+bindSlider('beta', 'beta', 'lBeta', v => v.toFixed(2));
+bindSlider('assiette', 'assiette', 'lAssiette', v => v.toFixed(1));
+
+function resetParams() {
+  const defaults = {prod:0.7,chom:7.0,fec:1.8,rend:5.0,cfrr:10,dtau:0.10,beta:0.90,assiette:3.5};
+  Object.assign(params, defaults);
+  document.getElementById('prod').value = defaults.prod;
+  document.getElementById('chom').value = defaults.chom;
+  document.getElementById('fec').value = defaults.fec;
+  document.getElementById('rend').value = defaults.rend;
+  document.getElementById('cfrr').value = defaults.cfrr;
+  document.getElementById('dtau').value = defaults.dtau;
+  document.getElementById('beta').value = defaults.beta;
+  document.getElementById('assiette').value = defaults.assiette;
+  document.getElementById('lProd').textContent = '0.7%';
+  document.getElementById('lChom').textContent = '7.0%';
+  document.getElementById('lFec').textContent = '1.80';
+  document.getElementById('lRend').textContent = '5.0%';
+  document.getElementById('lCfrr').textContent = '10%';
+  document.getElementById('lDtau').textContent = '0.10 pt';
+  document.getElementById('lBeta').textContent = '0.90';
+  document.getElementById('lAssiette').textContent = '3.5';
+  updateCharts();
+}
+
+// ══════════════════════════════════════════════════════════
+// API CHECK — data.gouv.fr
+// ══════════════════════════════════════════════════════════
+
+async function checkDataGouv() {
+  const apiStatus = document.getElementById('apiStatus');
+  const srcDot = document.getElementById('srcDot');
+  const srcStatus = document.getElementById('srcStatus');
+
+  try {
+    const r = await fetch('https://www.data.gouv.fr/api/1/datasets/?q=COR+retraites&page_size=1', {
+      signal: AbortSignal.timeout(5000)
+    });
+    if(r.ok) {
+      apiStatus.className = 'source-status s-live';
+      apiStatus.textContent = '● API disponible — données intégrées v2025';
+      srcDot.className = 'src-dot';
+      srcStatus.textContent = 'Données COR 2025 — juin 2025';
+    } else {
+      throw new Error('non-ok');
+    }
+  } catch(e) {
+    apiStatus.className = 'source-status s-embed';
+    apiStatus.textContent = '● API indisponible — données intégrées utilisées';
+    srcDot.className = 'src-dot loading';
+    srcStatus.textContent = 'Données intégrées COR 2025';
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════
+
+window.addEventListener('DOMContentLoaded', () => {
+  initCharts();
+  updateCharts();
+  checkDataGouv();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IPAA — Note de synthèse | Cabin Skolar</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800&family=Lora:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream:   #F2EDE6;
+    --red:     #7D3020;
+    --red-pale:#F0E0D8;
+    --black:   #1A1510;
+    --dark:    #2C2218;
+    --mid:     #6B5E54;
+    --light:   #A89B92;
+    --border:  #D8CFC6;
+    --white:   #FFFFFF;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Figtree', sans-serif;
+    font-weight: 300;
+    color: var(--dark);
+    background: #e8e0d6;
+    line-height: 1.65;
+  }
+
+  /* PRINT BUTTON — screen only */
+  .print-bar {
+    background: var(--black);
+    padding: 12px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 10;
+  }
+  .print-bar span { font-size: 12px; color: rgba(255,255,255,0.5); letter-spacing: .06em; }
+  .print-btn {
+    background: var(--red); color: white;
+    border: none; cursor: pointer;
+    padding: 8px 20px; border-radius: 100px;
+    font-family: 'Figtree', sans-serif;
+    font-size: 12px; font-weight: 600; letter-spacing: .04em;
+    transition: background .2s;
+  }
+  .print-btn:hover { background: #5a2218; }
+
+  /* PAGE WRAPPER */
+  .pages { padding: 32px; display: flex; flex-direction: column; gap: 32px; align-items: center; }
+
+  /* A4 PAGE */
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    background: var(--white);
+    box-shadow: 0 4px 40px rgba(0,0,0,0.15);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* PAGE 1 — COVER */
+  .page-cover { }
+  .cover-top {
+    background: var(--black);
+    padding: 40px 52px 36px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 148mm;
+  }
+  .cover-brand {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 60px;
+  }
+  .brand-dot { width: 10px; height: 10px; background: var(--red); border-radius: 50%; }
+  .brand-name { font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,0.6); }
+  .brand-sep { width: 1px; height: 12px; background: rgba(255,255,255,0.2); }
+  .brand-type { font-size: 12px; color: rgba(255,255,255,0.35); letter-spacing: .06em; }
+
+  .cover-eyebrow {
+    font-size: 10px; font-weight: 600; letter-spacing: .2em;
+    text-transform: uppercase; color: var(--red);
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 20px;
+  }
+  .cover-eyebrow::before { content: ''; width: 16px; height: 2px; background: var(--red); }
+
+  .cover-title {
+    font-size: 52px; font-weight: 900; line-height: 1.0;
+    letter-spacing: -.02em; color: white;
+    margin-bottom: 10px;
+  }
+  .cover-title em {
+    font-family: 'Lora', serif; font-style: italic;
+    font-weight: 400; color: rgba(255,255,255,0.5);
+    font-size: 44px;
+  }
+  .cover-subtitle {
+    font-size: 15px; font-weight: 300; color: rgba(255,255,255,0.55);
+    line-height: 1.6; max-width: 400px; margin-top: 16px;
+  }
+
+  .cover-pills {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-top: 32px;
+  }
+  .cpill {
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 100px; padding: 4px 14px;
+    font-size: 11px; color: rgba(255,255,255,0.5);
+  }
+
+  .cover-bottom {
+    background: var(--cream);
+    padding: 28px 52px;
+  }
+  .cover-demand {
+    font-size: 13px; font-weight: 600; color: var(--red);
+    letter-spacing: .04em; text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .cover-demand-text {
+    font-family: 'Lora', serif; font-style: italic;
+    font-size: 18px; color: var(--black); line-height: 1.5;
+  }
+  .cover-meta {
+    margin-top: 20px; display: flex; justify-content: space-between;
+    font-size: 11px; color: var(--light);
+  }
+
+  /* PAGES 2-4 — CONTENT */
+  .page-content { padding: 0; }
+  .page-header {
+    background: var(--cream);
+    padding: 20px 44px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .ph-brand { font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--light); }
+  .ph-title { font-size: 11px; color: var(--mid); }
+  .ph-page { font-size: 10px; color: var(--light); }
+
+  .page-body { padding: 32px 44px; flex: 1; }
+  .page-footer {
+    padding: 14px 44px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between;
+    font-size: 10px; color: var(--light);
+    background: var(--white);
+  }
+
+  /* CONTENT COMPONENTS */
+  .section-tag {
+    font-size: 10px; font-weight: 600; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--red);
+    display: flex; align-items: center; gap: 6px;
+    margin-bottom: 10px;
+  }
+  .section-tag::before { content: ''; width: 12px; height: 2px; background: var(--red); }
+
+  h2 {
+    font-size: 22px; font-weight: 800; line-height: 1.15;
+    letter-spacing: -.02em; color: var(--black);
+    margin-bottom: 12px;
+  }
+  h2 em { font-family: 'Lora', serif; font-style: italic; font-weight: 400; color: var(--red); }
+
+  h3 {
+    font-size: 13px; font-weight: 700; color: var(--black);
+    margin-bottom: 6px; margin-top: 18px;
+  }
+
+  p { font-size: 13px; color: var(--mid); line-height: 1.75; margin-bottom: 10px; }
+  p:last-child { margin-bottom: 0; }
+  p strong { color: var(--dark); font-weight: 600; }
+
+  .lead-p {
+    font-size: 15px; font-weight: 400; color: var(--dark);
+    line-height: 1.7; margin-bottom: 20px;
+    border-left: 3px solid var(--red);
+    padding-left: 16px;
+  }
+
+  /* STAT ROW */
+  .stat-row {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 2px; margin: 18px 0;
+    background: var(--border); border-radius: 6px; overflow: hidden;
+  }
+  .stat-cell {
+    background: var(--white); padding: 16px 18px; text-align: center;
+  }
+  .stat-cell:first-child { background: var(--cream); }
+  .stat-num {
+    font-size: 28px; font-weight: 900; letter-spacing: -.02em;
+    color: var(--red); line-height: 1;
+  }
+  .stat-lbl { font-size: 11px; color: var(--light); margin-top: 4px; line-height: 1.4; }
+
+  /* LEVEL TABLE */
+  .levels { margin: 16px 0; }
+  .level {
+    display: grid; grid-template-columns: 36px 1fr;
+    gap: 0; border-bottom: 1px solid var(--cream);
+    padding: 10px 0;
+  }
+  .level:last-child { border-bottom: none; }
+  .lbadge {
+    width: 24px; height: 24px; background: var(--red);
+    border-radius: 50%; color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 800; margin-top: 2px;
+    flex-shrink: 0;
+  }
+  .lbody {}
+  .ltitle { font-size: 12px; font-weight: 700; color: var(--black); margin-bottom: 2px; }
+  .ltext { font-size: 11px; color: var(--mid); line-height: 1.6; }
+
+  /* GUARANTEE GRID */
+  .g2-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin: 14px 0;
+  }
+  .g2-card {
+    border: 1px solid var(--border);
+    border-radius: 6px; padding: 14px 16px;
+    background: var(--cream);
+  }
+  .g2-title { font-size: 12px; font-weight: 700; color: var(--black); margin-bottom: 4px; }
+  .g2-text { font-size: 11px; color: var(--mid); line-height: 1.6; }
+
+  /* PARTY TABLE */
+  .party-table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 11px; }
+  .party-table th {
+    background: var(--black); color: white;
+    padding: 8px 12px; text-align: left;
+    font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+  }
+  .party-table td {
+    padding: 9px 12px; border-bottom: 1px solid var(--cream);
+    vertical-align: top; color: var(--mid); line-height: 1.6;
+  }
+  .party-table tr:last-child td { border-bottom: none; }
+  .party-table tr:nth-child(even) td { background: var(--cream); }
+  .party-name { font-weight: 600; color: var(--dark); white-space: nowrap; }
+  .party-angle { color: var(--red); font-weight: 500; }
+
+  /* TIMELINE */
+  .timeline { margin: 14px 0; }
+  .tl-item {
+    display: grid; grid-template-columns: 80px 1fr;
+    gap: 16px; padding: 8px 0; border-bottom: 1px solid var(--cream);
+  }
+  .tl-item:last-child { border-bottom: none; }
+  .tl-time { font-size: 11px; font-weight: 700; color: var(--red); padding-top: 2px; }
+  .tl-body {}
+  .tl-title { font-size: 12px; font-weight: 700; color: var(--black); margin-bottom: 2px; }
+  .tl-text { font-size: 11px; color: var(--mid); line-height: 1.6; }
+
+  /* BLOCKQUOTE */
+  .bq {
+    border-left: 3px solid var(--red);
+    padding: 12px 16px;
+    background: var(--cream);
+    border-radius: 0 6px 6px 0;
+    margin: 16px 0;
+    font-family: 'Lora', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--dark);
+    line-height: 1.7;
+  }
+
+  /* DIVIDER */
+  hr { border: none; border-top: 1px solid var(--border); margin: 18px 0; }
+
+  /* DEMAND BOX */
+  .demand-box {
+    background: var(--black);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin: 16px 0;
+  }
+  .demand-box-title {
+    font-size: 10px; font-weight: 700; letter-spacing: .16em;
+    text-transform: uppercase; color: var(--red);
+    margin-bottom: 10px;
+  }
+  .demand-box-text {
+    font-family: 'Lora', serif; font-style: italic;
+    font-size: 16px; color: white; line-height: 1.5;
+    margin-bottom: 12px;
+  }
+  .demand-list { list-style: none; }
+  .demand-list li {
+    font-size: 12px; color: rgba(255,255,255,0.55);
+    padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.07);
+    display: flex; gap: 8px;
+  }
+  .demand-list li:last-child { border-bottom: none; }
+  .demand-list li::before { content: '→'; color: var(--red); flex-shrink: 0; }
+
+  /* NOTE BOX */
+  .note-box {
+    background: var(--red-pale);
+    border-left: 3px solid var(--red);
+    padding: 10px 14px;
+    border-radius: 0 4px 4px 0;
+    margin: 12px 0;
+    font-size: 11px; color: var(--mid); line-height: 1.65;
+  }
+  .note-box strong { color: var(--dark); }
+
+  /* TWO COLUMNS */
+  .cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+  /* PRINT STYLES */
+  @media print {
+    .print-bar { display: none; }
+    body { background: white; }
+    .pages { padding: 0; gap: 0; }
+    .page {
+      box-shadow: none;
+      page-break-after: always;
+      width: 210mm;
+      min-height: 297mm;
+    }
+    .page:last-child { page-break-after: avoid; }
+    @page { size: A4; margin: 0; }
+  }
+
+  @media screen and (max-width: 240mm) {
+    .pages { padding: 0; }
+    .page { width: 100%; min-height: auto; }
+    .cover-title { font-size: 36px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="print-bar">
+  <span>IPAA — Note de synthèse — Cabin Skolar 2025</span>
+  <button class="print-btn" onclick="window.print()">⎙ Imprimer / Exporter PDF</button>
+</div>
+
+<div class="pages">
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- PAGE 1 — COUVERTURE                           -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="page page-cover">
+  <div class="cover-top">
+    <div>
+      <div class="cover-brand">
+        <div class="brand-dot"></div>
+        <span class="brand-name">Cabin Skolar</span>
+        <span class="brand-sep"></span>
+        <span class="brand-type">Note de synthèse</span>
+      </div>
+      <div class="cover-eyebrow">Working Paper — Octobre 2025</div>
+      <div class="cover-title">IPAA<br><em>Indice Progressif<br>Auto-Ajustable</em></div>
+      <div class="cover-subtitle">Pour une gouvernance algorithmique et souveraine du système de retraite français. Pas de recul de l'âge. Zéro choc tarifaire. Transparence totale.</div>
+      <div class="cover-pills">
+        <span class="cpill">Apartisan</span>
+        <span class="cpill">Reproductible</span>
+        <span class="cpill">Open data</span>
+        <span class="cpill">27 700 mots — Working paper complet disponible</span>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:rgba(255,255,255,0.08);border-radius:6px;overflow:hidden;margin-top:32px;">
+      <div style="background:rgba(255,255,255,0.06);padding:20px;text-align:center;">
+        <div style="font-size:32px;font-weight:900;color:var(--red);line-height:1">12</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:4px;line-height:1.4">réformes depuis 1993 sans solution structurelle</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.06);padding:20px;text-align:center;">
+        <div style="font-size:32px;font-weight:900;color:white;line-height:1">40 Md€</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:4px;line-height:1.4">déficit projeté en 2050 sans réforme structurelle</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.06);padding:20px;text-align:center;">
+        <div style="font-size:32px;font-weight:900;color:white;line-height:1">9,1%</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:4px;line-height:1.4">rendement annualisé RPC Canada sur 10 ans — modèle de référence</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cover-bottom">
+    <div class="cover-demand">Demande formelle</div>
+    <div class="cover-demand-text">"Créer une Commission d'Étude Technique Pluripartite (CETP) pour examiner, tester, et si les résultats le justifient, légiférer sur le dispositif IPAA."</div>
+    <div class="cover-meta">
+      <span>Cabin Skolar — contact@cabinskolar.fr — cabinskolar.fr</span>
+      <span>Octobre 2025 — CC BY 4.0</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- PAGE 2 — DIAGNOSTIC + MÉCANISME               -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="page page-content">
+  <div class="page-header">
+    <span class="ph-brand">Cabin Skolar · IPAA</span>
+    <span class="ph-title">Note de synthèse</span>
+    <span class="ph-page">2 / 4</span>
+  </div>
+
+  <div class="page-body">
+
+    <div class="section-tag">Diagnostic</div>
+    <h2>Pourquoi les réformes<br><em>échouent toujours</em></h2>
+
+    <p class="lead-p">Le problème des retraites françaises n'est pas démographique uniquement. Il est méthodologique. Douze réformes paramétriques successives ont traité les symptômes sans toucher à la structure.</p>
+
+    <div class="stat-row">
+      <div class="stat-cell">
+        <div class="stat-num">0,4%</div>
+        <div class="stat-lbl">déficit structurel 2025 en % du PIB</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">0,8%</div>
+        <div class="stat-lbl">déficit projeté 2040 sans réforme</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">1,7→1,4</div>
+        <div class="stat-lbl">ratio actifs/retraités 2025→2050</div>
+      </div>
+    </div>
+
+    <p>Une fraction substantielle du déficit résulte d'<strong>exonérations de cotisations patronales</strong> compensées par de la TVA affectée — des choix politiques corrigeables, pas une fatalité. Le système a été rendu déficitaire pour alimenter un levier politique.</p>
+
+    <p>La contrainte démographique est réelle et non contournable. <strong>L'IPAA ne prétend pas la résoudre</strong> — il est dimensionné pour fonctionner malgré elle, dans tous les scénarios COR.</p>
+
+    <hr>
+
+    <div class="section-tag">Architecture</div>
+    <h2>Le mécanisme en<br><em>quatre niveaux</em></h2>
+
+    <p>L'Algorithme de Convergences AC-IPAA fonctionne selon une hiérarchie stricte. Chaque niveau n'est activé que si le précédent est insuffisant.</p>
+
+    <div class="levels">
+      <div class="level">
+        <div class="lbadge">0</div>
+        <div class="lbody">
+          <div class="ltitle">Péréquation inter-caisses</div>
+          <div class="ltext">Les excédents des caisses excédentaires alimentent automatiquement un pool commun redistribué vers les caisses déficitaires. Bénéficie en priorité aux agriculteurs et indépendants. Aucune décision politique.</div>
+        </div>
+      </div>
+      <div class="level">
+        <div class="lbadge">1</div>
+        <div class="lbody">
+          <div class="ltitle">Lissage FRR anti-volatilité</div>
+          <div class="ltext">Le Fonds de Réserve absorbe les fluctuations annuelles. Trois compartiments étanches : socle souverain intouchable, réserve de lissage, capital de croissance sous mandat bancaire encadré.</div>
+        </div>
+      </div>
+      <div class="level">
+        <div class="lbadge">2</div>
+        <div class="lbody">
+          <div class="ltitle">Ajustement progressif ∆τ par décile</div>
+          <div class="ltext">Si nécessaire, ajustement de taux progressif, lissé sur 7 ans, annoncé à l'avance. <strong>Bouclier Social</strong> : D1 à D4 (40% de la population) — impact zéro. Effort concentré sur les déciles supérieurs.</div>
+        </div>
+      </div>
+      <div class="level">
+        <div class="lbadge">3</div>
+        <div class="lbody">
+          <div class="ltitle">Clause de sauvegarde parlementaire</div>
+          <div class="ltext">Déclenchée uniquement en cas de choc exogène exceptionnel. Le Parlement délibère uniquement sur les paramètres temporaires — jamais sur les constantes fondamentales.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="page-footer">
+    <span>cabinskolar.fr — contact@cabinskolar.fr</span>
+    <span>Working paper complet : 27 700 mots — Sources : COR 2025, INSEE, DREES, URSSAF</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- PAGE 3 — GARANTIES + IMPACT CONCRET           -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="page page-content">
+  <div class="page-header">
+    <span class="ph-brand">Cabin Skolar · IPAA</span>
+    <span class="ph-title">Note de synthèse</span>
+    <span class="ph-page">3 / 4</span>
+  </div>
+
+  <div class="page-body">
+
+    <div class="section-tag">Gouvernance</div>
+    <h2>Quatre verrous contre<br><em>toute interférence politique</em></h2>
+
+    <div class="g2-grid">
+      <div class="g2-card">
+        <div class="g2-title">Verrou constitutionnel</div>
+        <div class="g2-text">L'argent des retraites ne peut légalement servir qu'aux retraites. Inscrit dans la Constitution — nul et inconstitutionnel quelle que soit la majorité.</div>
+      </div>
+      <div class="g2-card">
+        <div class="g2-title">Verrou algorithmique</div>
+        <div class="g2-text">Aucun ministre ne décide d'une hausse de cotisation. L'AC-IPAA calcule automatiquement selon des règles votées une fois à la majorité des 3/5.</div>
+      </div>
+      <div class="g2-card">
+        <div class="g2-title">Verrou juridique</div>
+        <div class="g2-text">Toute modification des constantes légales : 3/5 de l'Assemblée + motivation technique publique + délai de 6 mois minimum. Aucune modification en urgence.</div>
+      </div>
+      <div class="g2-card">
+        <div class="g2-title">Verrou démocratique</div>
+        <div class="g2-text">retraite.gouv.fr publie en temps réel tous les flux, soldes, alertes et tentatives d'interférence. Toute manipulation est visible immédiatement par tous.</div>
+      </div>
+    </div>
+
+    <div class="bq">"Un système entièrement lisible par tous ne peut être manipulé que publiquement. Et publiquement, personne n'ose. La transparence n'est pas une promesse — c'est le système immunitaire du dispositif."</div>
+
+    <hr>
+
+    <div class="section-tag">Impact concret</div>
+    <h2>Ce que ça change<br><em>pour chacun</em></h2>
+
+    <div class="cols2">
+      <div>
+        <h3>Pour les citoyens</h3>
+        <p>Cotisation <strong>lisible et prévisible sur 7 ans</strong>. Les 40% les plus modestes : impact zéro. L'argent des retraites est légalement fléché — il ne peut pas servir à autre chose, quelle que soit la majorité au pouvoir.</p>
+
+        <h3>Pour les entreprises</h3>
+        <p>Visibilité sur les charges sociales à <strong>7 ans</strong>. Prime de risque sur les charges sociales supprimée. TPE de moins de 10 salariés : exonération patronale les 3 premières années.</p>
+      </div>
+      <div>
+        <h3>Pour les agriculteurs</h3>
+        <p>La péréquation inter-caisses reconnaît <strong>structurellement</strong> les retraites insuffisantes de la MSA non-salariés (moyenne : 850€/mois). Amélioration automatique, sans négociation politique annuelle.</p>
+
+        <h3>Pour les élus</h3>
+        <p>Sortir définitivement d'un dossier qui empoisonne la vie politique depuis 30 ans. Un actif politique réel à mi-mandat si le système démontre son efficacité — ce que les projections indiquent dès 3 ans.</p>
+      </div>
+    </div>
+
+    <div class="note-box">
+      <strong>Référence internationale :</strong> Le Canada applique ce modèle depuis 1997. Investissements RPC : 777,5 milliards CAD sous gestion, 9,1% de rendement annualisé sur 10 ans. Aucun gouvernement en 28 ans n'a remis en cause son indépendance — pas parce que c'est impossible, mais parce que c'est politiquement suicidaire quand le système fonctionne.
+    </div>
+
+  </div>
+  <div class="page-footer">
+    <span>cabinskolar.fr — contact@cabinskolar.fr</span>
+    <span>Simulateur interactif disponible sur cabinskolar.fr/ipaa</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- PAGE 4 — STRATÉGIE + DEMANDE FORMELLE         -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="page page-content">
+  <div class="page-header">
+    <span class="ph-brand">Cabin Skolar · IPAA</span>
+    <span class="ph-title">Note de synthèse</span>
+    <span class="ph-page">4 / 4</span>
+  </div>
+
+  <div class="page-body">
+
+    <div class="section-tag">Positionnement politique</div>
+    <h2>Un projet apartisan.<br><em>Un argument pour chaque camp.</em></h2>
+
+    <p>L'IPAA place chaque formation politique devant sa propre cohérence. S'y opposer, c'est expliquer pourquoi on préfère l'instabilité structurelle.</p>
+
+    <table class="party-table">
+      <thead>
+        <tr>
+          <th>Formation</th>
+          <th>Angle IPAA</th>
+          <th>Argument décisif</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="party-name">LFI / PCF</span></td>
+          <td><span class="party-angle">Souveraineté publique</span></td>
+          <td>Fonds souverain CDC. Bouclier Social D1-D4. Péréquation pour les agriculteurs. Ce n'est pas de la capitalisation.</td>
+        </tr>
+        <tr>
+          <td><span class="party-name">PS</span></td>
+          <td><span class="party-angle">Réformisme sérieux</span></td>
+          <td>La méthode paramétrique a échoué. L'IPAA est la réforme structurelle que la gauche modérée aurait dû proposer depuis 20 ans.</td>
+        </tr>
+        <tr>
+          <td><span class="party-name">Écologistes</span></td>
+          <td><span class="party-angle">Long terme / intergénérationnel</span></td>
+          <td>Règles stables, horizon N+5, équité intergénérationnelle inscrite dans la mécanique — pas dans une promesse électorale.</td>
+        </tr>
+        <tr>
+          <td><span class="party-name">Centre / Renaissance</span></td>
+          <td><span class="party-angle">Rupture méthodologique</span></td>
+          <td>Sortir de l'héritage macroniste par une proposition technique originale. Assumer les exonérations non compensées et proposer une correction.</td>
+        </tr>
+        <tr>
+          <td><span class="party-name">Droite / LR</span></td>
+          <td><span class="party-angle">Rigueur budgétaire</span></td>
+          <td>Frein à l'endettement social. Neutralité sur le coût du travail. Modèle canadien — référence libérale-conservatrice. Exonération TPE 3 ans.</td>
+        </tr>
+        <tr>
+          <td><span class="party-name">RN</span></td>
+          <td><span class="party-angle">Protection classes populaires</span></td>
+          <td>Bouclier Social pour les ouvriers. Péréquation pour les agriculteurs. Étanchéité contre le pillage des caisses. Cohérence avec le discours.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <hr>
+
+    <div class="section-tag">Demande formelle</div>
+    <h2>La CETP — une commission,<br><em>pas un comité permanent</em></h2>
+
+    <div class="demand-box">
+      <div class="demand-box-title">Demande unique</div>
+      <div class="demand-box-text">Créer une Commission d'Étude Technique Pluripartite (CETP) chargée d'examiner, tester, et légiférer sur le dispositif IPAA.</div>
+      <ul class="demand-list">
+        <li>14 membres maximum — économistes COR, juristes, syndicats, patronat, démographes INSEE</li>
+        <li>18 mois de mandat — calibration des constantes légales, projet de loi organique</li>
+        <li>Dissolution à l'issue — pas de structure permanente, pas de budget colossal</li>
+        <li>Livrable : un texte de loi prêt à voter, pas un rapport de plus</li>
+      </ul>
+    </div>
+
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-time">Mois 1-18</div>
+        <div class="tl-body">
+          <div class="tl-title">Travaux CETP</div>
+          <div class="tl-text">Validation de la modélisation sur données officielles, calibration des βi et CFРР, rédaction du projet de loi organique.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-time">Mois 18-30</div>
+        <div class="tl-body">
+          <div class="tl-title">Adoption législative</div>
+          <div class="tl-text">Avis Conseil d'État, débat parlementaire, contrôle Conseil Constitutionnel, promulgation.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-time">Mois 30-42</div>
+        <div class="tl-body">
+          <div class="tl-title">Mise en place</div>
+          <div class="tl-text">Infrastructure URSSAF, système de surveillance, retraite.gouv.fr, premier cycle AC-IPAA opérationnel.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-time">Mois 42+</div>
+        <div class="tl-body">
+          <div class="tl-title">Résultats visibles</div>
+          <div class="tl-text">Stabilisation des déficits mesurable, taux de cotisation stables pour 70% de la population, FRR en trajectoire de recapitalisation.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:var(--cream);border-radius:6px;padding:16px 20px;margin-top:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--red);margin-bottom:4px;">Pour en savoir plus</div>
+        <div style="font-size:12px;color:var(--mid);">Working paper complet (27 700 mots) · Simulateur interactif · Sources ouvertes</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:13px;font-weight:600;color:var(--dark);">contact@cabinskolar.fr</div>
+        <div style="font-size:12px;color:var(--light);">cabinskolar.fr/ipaa</div>
+      </div>
+    </div>
+
+  </div>
+  <div class="page-footer">
+    <span>Cabin Skolar — Independent AI Research — Octobre 2025 — CC BY 4.0</span>
+    <span>Ce document est mis dans le domaine public. Il n'appartient à aucun parti politique.</span>
+  </div>
+</div>
+
+</div><!-- /pages -->
+</body>
+</html>
